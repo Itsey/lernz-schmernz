@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="TestNLearn.Test/TestNLearn.Test.csproj" />
+  <Project Path="TestNLearn/TestNLearn.csproj" />
+  <Project Path="TestNLearnApp/TestNLearnApp.csproj" />
+  <Project Path="_Dependencies/_Dependencies.csproj" />
+</Solution>
