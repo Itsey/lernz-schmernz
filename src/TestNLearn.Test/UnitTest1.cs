@@ -9,6 +9,7 @@ public class Module1Tests {
 
     [Fact]
     public void Test1() {
+        b.Info.Flow();
         var sut = new Module1();
     }
 }
