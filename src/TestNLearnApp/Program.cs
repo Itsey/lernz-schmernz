@@ -7,9 +7,16 @@ internal class Program {
     static void Main(string[] args) {
         Console.WriteLine("Hello, World!");
 
+
+        var b1 = new Bilge();
+        Console.WriteLine($"Before {b1.ActiveTraceLevel}");
         Bilge.SetConfigurationResolver((a, b) => {
             return System.Diagnostics.SourceLevels.Verbose;
         });
+
+
+        var b2 = new Bilge();
+        Console.WriteLine($"After {b2.ActiveTraceLevel}");
 
         var hnd = new TCPHandler("127.0.0.1", 9060, true);
 
