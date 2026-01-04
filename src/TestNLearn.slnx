@@ -2,5 +2,6 @@
   <Project Path="TestNLearn.Test/TestNLearn.Test.csproj" />
   <Project Path="TestNLearn/TestNLearn.csproj" />
   <Project Path="TestNLearnApp/TestNLearnApp.csproj" />
+  <Project Path="TnLSite/TnLSite.csproj" Id="c0cd0ca2-6640-4ab4-9d71-eacc0b002d66" />
   <Project Path="_Dependencies/_Dependencies.csproj" />
 </Solution>
