@@ -1,0 +1,28 @@
+@page
+@model TnLSite.Pages.AccountModel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Account</title>
+</head>
+<body>
+    <h1>Account</h1>
+    @if (!string.IsNullOrWhiteSpace(Model.Message)) {
+        <p>@Model.Message</p>
+    }
+    @if (!string.IsNullOrWhiteSpace(Model.UserName)) {
+        <p>User: @Model.UserName</p>
+        <p>Balance: @Model.Balance</p>
+        <form method="post">
+            <input type="hidden" name="UserId" value="@Model.UserId" />
+            <input type="hidden" name="Token" value="@Model.Token" />
+            <label for="amount">Amount</label>
+            <input id="amount" name="Amount" value="@Model.Amount" />
+            <label for="date">Date</label>
+            <input id="date" name="Date" type="date" value="@Model.Date.ToString("yyyy-MM-dd")" />
+            <button type="submit">Submit</button>
+        </form>
+    }
+</body>
+</html>

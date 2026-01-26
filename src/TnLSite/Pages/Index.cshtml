@@ -1,0 +1,22 @@
+@page
+@model TnLSite.Pages.IndexModel
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Test and Learn Login</title>
+</head>
+<body>
+    <h1>Login</h1>
+    @if (!string.IsNullOrWhiteSpace(Model.ErrorMessage)) {
+        <p>@Model.ErrorMessage</p>
+    }
+    <form method="post">
+        <label for="userId">User Id</label>
+        <input id="userId" name="UserId" value="@Model.UserId" />
+        <label for="password">Password</label>
+        <input id="password" name="Password" type="password" />
+        <button type="submit">Sign in</button>
+    </form>
+</body>
+</html>
