@@ -9,10 +9,10 @@ namespace TnLSite.Controllers;
 [Route("api/web")]
 public sealed class WebController : ApiControllerBase {
     protected Bilge b;
-    private readonly IAccountService accountService;
+    private readonly AccountService accountService;
     private readonly ITokenService tokenService;
 
-    public WebController(IAccountService accountService, ITokenService tokenService, DynamicTrace dt) {
+    public WebController(AccountService accountService, ITokenService tokenService, DynamicTrace dt) {
         b = dt.CreateBilge("tnl-web-controller");
 
         b.Info.Flow();
@@ -35,14 +35,26 @@ public sealed class WebController : ApiControllerBase {
         }
 
         b.Info.Log($"attempting to authenticate {request.UserId}");
-        var token = accountService.Login(request.UserId, request.Password);
+        string? token = accountService.Login(request.UserId, request.Password);
         return token is null ? Unauthorized() : Ok(token);
+    }
+
+    [HttpGet("ping")]
+    public ActionResult<bool> Ping() {
+        b.Info.Flow();
+
+        b.Info.Log("Before");
+        b.Verbose.Log($"Its {WeirdBuggySideEffectCode()}");
+        b.Info.Log("After");
+        return Ok(true);
     }
 
     [HttpGet("user/{userId}")]
     public ActionResult<UserDetails> GetUser(string userId) {
-        b.Info.Flow();
-        if (!TryGetToken(out var token)) {
+        b.Info.Flow($"{userId}");
+
+        string? token = GetToken();
+        if (token is null) {
             b.Warning.Log($"Request: {userId}. No token provided, failed to auth");
             return Unauthorized();
         }
@@ -59,14 +71,19 @@ public sealed class WebController : ApiControllerBase {
         } else {
             b.Warning.Log($"Request: {userId}. User details not found.");
         }
-
-        return details is null ? NotFound() : Ok(details);
+        if (details == null) {
+            b.Warning.Log($"Request: {userId}. User details not found.");
+            return NotFound();
+        }
+        return Ok(details);
     }
 
     [HttpGet("balance/{userId}")]
     public ActionResult<decimal> GetBalance(string userId) {
-        b.Info.Flow();
-        if (!TryGetToken(out var token)) {
+        b.Info.Flow($"{userId}");
+
+        string? token = GetToken();
+        if (token is null) {
             b.Warning.Log($"Request: {userId}. No token provided, failed to auth");
             return Unauthorized();
         }
@@ -76,7 +93,7 @@ public sealed class WebController : ApiControllerBase {
             return Unauthorized();
         }
 
-        var balance = accountService.GetBalance(userId, token);
+        decimal? balance = accountService.GetBalance(userId, token);
         return balance is null ? NotFound() : Ok(balance.Value);
     }
 
@@ -87,7 +104,8 @@ public sealed class WebController : ApiControllerBase {
             return BadRequest();
         }
 
-        if (!TryGetToken(out var token)) {
+        string? token = GetToken();
+        if (token is null) {
             b.Warning.Log($"Request: {request.UserId}. No token provided, failed to auth");
             return Unauthorized();
         }
@@ -108,7 +126,8 @@ public sealed class WebController : ApiControllerBase {
             return BadRequest();
         }
 
-        if (!TryGetToken(out var token)) {
+        string? token = GetToken();
+        if (token is null) {
             b.Warning.Log($"Request: {request.UserId}. No token provided, failed to auth");
             return Unauthorized();
         }
@@ -126,9 +145,9 @@ public sealed class WebController : ApiControllerBase {
         return Ok(result.balance.Value);
     }
 
-    private bool TryGetToken(out string token) {
+    private string? GetToken() {
         b.Info.Flow();
-        token = Request.Headers[TOKEN_HEADER_NAME].ToString();
-        return !string.IsNullOrWhiteSpace(token);
+        string token = Request.Headers[TOKEN_HEADER_NAME].ToString();
+        return string.IsNullOrWhiteSpace(token) ? null : token;
     }
 }

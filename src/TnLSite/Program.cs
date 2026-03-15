@@ -22,9 +22,11 @@ namespace TnLSite {
             builder.Services.AddControllers();
             builder.Services.AddRazorPages();
             builder.Services.AddSingleton<TnLSite.Data.RepositoryBase, TnLSite.Data.FileUserRepository>();
-            builder.Services.AddSingleton<TnLSite.Services.IAccountService, TnLSite.Services.AccountService>();
+            builder.Services.AddSingleton<TnLSite.Services.AccountService>();
             builder.Services.AddSingleton<TnLSite.Services.ITokenService, TnLSite.Services.InMemoryTokenService>();
             builder.Services.AddSingleton<DynamicTrace>();
+
+
 
             var app = builder.Build();
 

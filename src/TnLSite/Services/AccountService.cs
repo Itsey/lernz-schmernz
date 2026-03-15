@@ -4,7 +4,7 @@ using TnLSite.Models;
 
 namespace TnLSite.Services;
 
-public sealed class AccountService : IAccountService {
+public sealed class AccountService {
     protected Bilge b;
     private readonly RepositoryBase repository;
     private readonly ITokenService tokenService;

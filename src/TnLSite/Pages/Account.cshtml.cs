@@ -5,9 +5,9 @@ using TnLSite.Services;
 namespace TnLSite.Pages;
 
 public sealed class AccountModel : PageModel {
-    private readonly IAccountService accountService;
+    private readonly AccountService accountService;
 
-    public AccountModel(IAccountService accountService) {
+    public AccountModel(AccountService accountService) {
         this.accountService = accountService;
     }
 

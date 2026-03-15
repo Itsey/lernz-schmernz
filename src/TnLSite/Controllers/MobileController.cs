@@ -7,10 +7,10 @@ namespace TnLSite.Controllers;
 [ApiController]
 [Route("api/mobile")]
 public sealed class MobileController : ApiControllerBase {
-    private readonly IAccountService accountService;
+    private readonly AccountService accountService;
     private readonly ITokenService tokenService;
 
-    public MobileController(IAccountService accountService, ITokenService tokenService) {
+    public MobileController(AccountService accountService, ITokenService tokenService) {
         this.accountService = accountService;
         this.tokenService = tokenService;
     }
@@ -27,7 +27,8 @@ public sealed class MobileController : ApiControllerBase {
 
     [HttpGet("user/{userId}")]
     public ActionResult<UserDetails> GetUser(string userId) {
-        if (!TryGetToken(out var token)) {
+        var token = GetToken();
+        if (token is null) {
             return Unauthorized();
         }
 
@@ -41,7 +42,8 @@ public sealed class MobileController : ApiControllerBase {
 
     [HttpGet("balance/{userId}")]
     public ActionResult<decimal> GetBalance(string userId) {
-        if (!TryGetToken(out var token)) {
+        var token = GetToken();
+        if (token is null) {
             return Unauthorized();
         }
 
@@ -59,7 +61,8 @@ public sealed class MobileController : ApiControllerBase {
             return BadRequest();
         }
 
-        if (!TryGetToken(out var token)) {
+        var token = GetToken();
+        if (token is null) {
             return Unauthorized();
         }
 
@@ -77,7 +80,8 @@ public sealed class MobileController : ApiControllerBase {
             return BadRequest();
         }
 
-        if (!TryGetToken(out var token)) {
+        var token = GetToken();
+        if (token is null) {
             return Unauthorized();
         }
 
@@ -93,8 +97,8 @@ public sealed class MobileController : ApiControllerBase {
         return Ok(result.balance.Value);
     }
 
-    private bool TryGetToken(out string token) {
-        token = Request.Headers[TOKEN_HEADER_NAME].ToString();
-        return !string.IsNullOrWhiteSpace(token);
+    private string? GetToken() {
+        var token = Request.Headers[TOKEN_HEADER_NAME].ToString();
+        return string.IsNullOrWhiteSpace(token) ? null : token;
     }
 }

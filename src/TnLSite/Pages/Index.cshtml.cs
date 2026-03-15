@@ -5,9 +5,9 @@ using TnLSite.Services;
 namespace TnLSite.Pages;
 
 public sealed class IndexModel : PageModel {
-    private readonly IAccountService accountService;
+    private readonly AccountService accountService;
 
-    public IndexModel(IAccountService accountService) {
+    public IndexModel(AccountService accountService) {
         this.accountService = accountService;
     }
 

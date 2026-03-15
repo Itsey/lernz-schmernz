@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using TnLSite.Models;
 using TnLSite.Services;
 
@@ -7,12 +6,16 @@ namespace TnLSite.Controllers;
 
 [ApiController]
 [Route("api/client")]
-public sealed class ClientController : ApiControllerBase {
-    private readonly IAccountService accountService;
+public sealed partial class ClientController : ApiControllerBase {
+
+    [LoggerMessage(Level = LogLevel.Information, Message = "Method >> {Method}. {pmeter}")]
+    static partial void LogFlowMessage(ILogger logger, string method, string pmeter = "");
+
+    private readonly AccountService accountService;
     private readonly ILogger<ClientController> logger;
     private readonly ITokenService tokenService;
 
-    public ClientController(IAccountService accountService, ITokenService tokenService, ILogger<ClientController> logger) {
+    public ClientController(AccountService accountService, ITokenService tokenService, ILogger<ClientController> logger) {
         this.accountService = accountService;
         this.tokenService = tokenService;
         this.logger = logger;
@@ -20,7 +23,7 @@ public sealed class ClientController : ApiControllerBase {
 
     [HttpPost("login")]
     public ActionResult<string> Login([FromBody] LoginRequest request) {
-        logger.LogInformation("Entered {Method}", nameof(Login));
+        LogFlowMessage(logger, nameof(Login));
         if (request is null) {
             logger.LogWarning("Login request was null.");
             return BadRequest();
@@ -33,10 +36,26 @@ public sealed class ClientController : ApiControllerBase {
         return token is null ? Unauthorized() : Ok(token);
     }
 
+
+    [HttpGet("ping")]
+    public ActionResult<bool> Ping() {
+        LogFlowMessage(logger, nameof(Ping));
+
+        logger.LogInformation("Before");
+        logger.LogDebug($"Its {WeirdBuggySideEffectCode()}");
+        logger.LogInformation("After");
+
+
+        return Ok(true);
+    }
+
+
     [HttpGet("user/{userId}")]
     public ActionResult<UserDetails> GetUser(string userId) {
-        logger.LogInformation("Entered {Method}", nameof(GetUser));
-        if (!TryGetToken(out string? token)) {
+        LogFlowMessage(logger, nameof(GetUser), userId);
+
+        string? token = GetToken();
+        if (token is null) {
             logger.LogWarning("Token missing for GetUser on {UserId}.", userId);
             return Unauthorized();
         }
@@ -55,8 +74,10 @@ public sealed class ClientController : ApiControllerBase {
 
     [HttpGet("balance/{userId}")]
     public ActionResult<decimal> GetBalance(string userId) {
-        logger.LogInformation("Entered {Method}", nameof(GetBalance));
-        if (!TryGetToken(out string? token)) {
+        LogFlowMessage(logger, nameof(GetBalance), userId);
+
+        string? token = GetToken();
+        if (token is null) {
             logger.LogWarning("Token missing for GetBalance on {UserId}.", userId);
             return Unauthorized();
         }
@@ -75,13 +96,15 @@ public sealed class ClientController : ApiControllerBase {
 
     [HttpPost("user")]
     public ActionResult<UserDetails> CreateUser([FromBody] CreateUserRequest request) {
-        logger.LogInformation("Entered {Method}", nameof(CreateUser));
+        LogFlowMessage(logger, nameof(CreateUser));
+
         if (request is null) {
             logger.LogWarning("CreateUser request was null.");
             return BadRequest();
         }
 
-        if (!TryGetToken(out string? token)) {
+        string? token = GetToken();
+        if (token is null) {
             logger.LogWarning("Token missing for CreateUser on {UserId}.", request.UserId);
             return Unauthorized();
         }
@@ -106,7 +129,8 @@ public sealed class ClientController : ApiControllerBase {
             return BadRequest();
         }
 
-        if (!TryGetToken(out string? token)) {
+        string? token = GetToken();
+        if (token is null) {
             logger.LogWarning("Token missing for UpdateBalance on {UserId}.", request.UserId);
             return Unauthorized();
         }
@@ -125,9 +149,9 @@ public sealed class ClientController : ApiControllerBase {
         return Ok(result.balance.Value);
     }
 
-    private bool TryGetToken(out string token) {
-        logger.LogInformation("Entered {Method}", nameof(TryGetToken));
-        token = Request.Headers[TOKEN_HEADER_NAME].ToString();
-        return !string.IsNullOrWhiteSpace(token);
+    private string? GetToken() {
+        logger.LogInformation("Entered {Method}", nameof(GetToken));
+        var token = Request.Headers[TOKEN_HEADER_NAME].ToString();
+        return string.IsNullOrWhiteSpace(token) ? null : token;
     }
 }
