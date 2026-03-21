@@ -9,14 +9,17 @@ namespace TestNLearn.Test;
 public class LoggingTests {
     protected Bilge b = new("tnl-module1-test");
 
+    public LoggingTests() {
+
+    }
 
     [Fact]
     public async Task Get_user_without_logon_returns_unauthorised() {
         b.Info.Flow();
 
-        var f = await "http://localhost:5050/api/web/user/1234".GetAsync();
+        var f = await "http://localhost:5050/api/web/user/1234".AllowAnyHttpStatus().GetAsync();
 
-        f.ResponseMessage.StatusCode.ShouldBeEquivalentTo(401);
+        f.ResponseMessage.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.Unauthorized);
     }
 
 
@@ -24,7 +27,7 @@ public class LoggingTests {
     public async Task Login_request_without_correct_creds_is_unauthorised() {
         b.Info.Flow();
 
-        var f = await "http://localhost:5050/api/web/login/".PostJsonAsync(new {
+        var f = await "http://localhost:5050/api/web/login/".AllowAnyHttpStatus().PostJsonAsync(new {
             UserId = "123",
             Password = "456"
         });

@@ -14,8 +14,10 @@ public sealed class WebController : ApiControllerBase {
 
     public WebController(AccountService accountService, ITokenService tokenService, DynamicTrace dt) {
         b = dt.CreateBilge("tnl-web-controller");
+        b.AddContext("controller", nameof(WebController));
+        b.AddContext("flowstart", DateTime.Now.ToString("HH:mm:ss:fff"));
 
-        b.Info.Flow();
+        b.Info.Flow("WebController");
         this.accountService = accountService;
         this.tokenService = tokenService;
     }
@@ -23,6 +25,7 @@ public sealed class WebController : ApiControllerBase {
     [HttpPost("login")]
     public ActionResult<string> Login([FromBody] LoginRequest request) {
         b.Info.Flow();
+        b.Info.Log("Quick Mesage To Test Logging");
 
         if (request is null) {
             b.Warning.Log("Null request found");
