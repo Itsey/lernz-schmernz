@@ -3,7 +3,7 @@ using Plisky.Diagnostics.Listeners;
 using Xunit.Abstractions;
 using Xunit.Sdk;
 
-[assembly: Xunit.TestFramework("Plisky.Diagnostics.Test.XunitAutoTraceFixture", "TestNLearn.Test")]
+[assembly: Xunit.TestFramework("TestNLearn.Test.XunitAutoTraceFixture", "TestNLearn.Test")]
 
 namespace TestNLearn.Test;
 
