@@ -13,13 +13,21 @@ public class LoggingTests {
 
     }
 
+
+    [Fact]
+    public async Task Get_user_without_token_returns_unauthorised() {
+        b.Info.Flow();
+        // Was thinking that this was clearer but its actually rubbish.  
+        await "http://localhost:5050/api/web/user/1234".AllowHttpStatus((int)HttpStatusCode.Unauthorized).GetAsync();
+    }
+
     [Fact]
     public async Task Get_user_without_logon_returns_unauthorised() {
         b.Info.Flow();
 
         var f = await "http://localhost:5050/api/web/user/1234".AllowAnyHttpStatus().GetAsync();
 
-        f.ResponseMessage.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.Unauthorized);
+        f.ResponseMessage.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
 
@@ -32,7 +40,7 @@ public class LoggingTests {
             Password = "456"
         });
 
-        f.ResponseMessage.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.Unauthorized);
+        f.ResponseMessage.StatusCode.ShouldBe(HttpStatusCode.Unauthorized);
     }
 
 
@@ -44,10 +52,10 @@ public class LoggingTests {
         // other stuff than just logging it gets executed during the logging.
 
         var f = await "http://localhost:5050/api/web/ping".GetAsync();
-        f.ResponseMessage.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.OK);
+        f.ResponseMessage.StatusCode.ShouldBe(HttpStatusCode.OK);
 
         f = await "http://localhost:5050/api/client/ping".GetAsync();
-        f.ResponseMessage.StatusCode.ShouldBeEquivalentTo(HttpStatusCode.OK);
+        f.ResponseMessage.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
 }
