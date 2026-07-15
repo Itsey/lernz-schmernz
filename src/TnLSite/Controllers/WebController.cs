@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Mvc;
 using Plisky.Diagnostics;
+using TnLSite.Controllers;
 using TnLSite.Models;
 using TnLSite.Services;
 
-namespace TnLSite.Controllers;
+namespace TnLSite.BilgeVersion;
+
 
 [ApiController]
 [Route("api/web")]
@@ -156,5 +158,14 @@ public sealed class WebController : ApiControllerBase {
         b.Info.Flow();
         string token = Request.Headers[TOKEN_HEADER_NAME].ToString();
         return string.IsNullOrWhiteSpace(token) ? null : token;
+    }
+
+    public ActionResult Gamble([FromBody] GambleRequest request) {
+        return Ok();
+    }
+
+
+    public ActionResult Gift([FromBody] GiftRequest request) {
+        return Ok();
     }
 }

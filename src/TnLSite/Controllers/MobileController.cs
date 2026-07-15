@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using TnLSite.Models;
 using TnLSite.Services;
 
+
 namespace TnLSite.Controllers;
 
 [ApiController]
@@ -21,13 +22,13 @@ public sealed class MobileController : ApiControllerBase {
             return BadRequest();
         }
 
-        var token = accountService.Login(request.UserId, request.Password);
+        string? token = accountService.Login(request.UserId, request.Password);
         return token is null ? Unauthorized() : Ok(token);
     }
 
     [HttpGet("user/{userId}")]
     public ActionResult<UserDetails> GetUser(string userId) {
-        var token = GetToken();
+        string? token = GetToken();
         if (token is null) {
             return Unauthorized();
         }
@@ -42,7 +43,7 @@ public sealed class MobileController : ApiControllerBase {
 
     [HttpGet("balance/{userId}")]
     public ActionResult<decimal> GetBalance(string userId) {
-        var token = GetToken();
+        string? token = GetToken();
         if (token is null) {
             return Unauthorized();
         }
@@ -51,7 +52,7 @@ public sealed class MobileController : ApiControllerBase {
             return Unauthorized();
         }
 
-        var balance = accountService.GetBalance(userId, token);
+        decimal? balance = accountService.GetBalance(userId, token);
         return balance is null ? NotFound() : Ok(balance.Value);
     }
 
@@ -61,7 +62,7 @@ public sealed class MobileController : ApiControllerBase {
             return BadRequest();
         }
 
-        var token = GetToken();
+        string? token = GetToken();
         if (token is null) {
             return Unauthorized();
         }
@@ -80,7 +81,7 @@ public sealed class MobileController : ApiControllerBase {
             return BadRequest();
         }
 
-        var token = GetToken();
+        string? token = GetToken();
         if (token is null) {
             return Unauthorized();
         }
@@ -98,7 +99,7 @@ public sealed class MobileController : ApiControllerBase {
     }
 
     private string? GetToken() {
-        var token = Request.Headers[TOKEN_HEADER_NAME].ToString();
+        string token = Request.Headers[TOKEN_HEADER_NAME].ToString();
         return string.IsNullOrWhiteSpace(token) ? null : token;
     }
 }

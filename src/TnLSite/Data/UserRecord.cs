@@ -1,4 +1,4 @@
-namespace TnLSite.Models;
+namespace TnLSite.Repository;
 
 public sealed class UserRecord {
     public string UserId { get; set; } = string.Empty;

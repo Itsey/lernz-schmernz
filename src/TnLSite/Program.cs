@@ -1,9 +1,11 @@
 using Plisky.Diagnostics;
 using Plisky.Diagnostics.Listeners;
-using TnLSite.Data;
+using TnLSite.Repository;
 
 namespace TnLSite {
     public class Program {
+        public static DynamicTrace dt = new DynamicTrace();
+
         public static void Main(string[] args) {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +23,7 @@ namespace TnLSite {
             // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddRazorPages();
-            builder.Services.AddSingleton<TnLSite.Data.RepositoryBase, TnLSite.Data.FileUserRepository>();
+            builder.Services.AddSingleton<TnLSite.Repository.RepositoryBase, TnLSite.Repository.FileUserRepository>();
             builder.Services.AddSingleton<TnLSite.Services.AccountService>();
             builder.Services.AddSingleton<TnLSite.Services.ITokenService, TnLSite.Services.InMemoryTokenService>();
             builder.Services.AddSingleton<DynamicTrace>();

@@ -1,11 +1,11 @@
 using Plisky.Diagnostics;
-using TnLSite.Data;
 using TnLSite.Models;
+using TnLSite.Repository;
 
 namespace TnLSite.Services;
 
 public sealed class AccountService {
-    protected Bilge b;
+    private Bilge b;
     private readonly RepositoryBase repository;
     private readonly ITokenService tokenService;
 
@@ -41,7 +41,7 @@ public sealed class AccountService {
         }
 
         var user = repository.GetUser(userId);
-        return user is null ? null : MapDetails(user);
+        return user?.ToDetails();
     }
 
     public decimal? GetBalance(string userId, string token) {
@@ -74,7 +74,7 @@ public sealed class AccountService {
         };
 
         repository.SaveUser(user);
-        return MapDetails(user);
+        return user.ToDetails();
     }
 
     public (decimal? balance, string? error) UpdateBalance(string userId, string token, decimal amount, DateTime date) {
@@ -101,15 +101,5 @@ public sealed class AccountService {
         user.Balance = newBalance;
         repository.SaveUser(user);
         return (newBalance, null);
-    }
-
-    private static UserDetails MapDetails(UserRecord user) {
-        return new UserDetails {
-            UserId = user.UserId,
-            UserName = user.UserName,
-            Balance = user.Balance,
-            Enabled = user.Enabled,
-            LastLogin = user.LastLogin
-        };
     }
 }

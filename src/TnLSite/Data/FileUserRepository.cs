@@ -2,7 +2,7 @@ using System.Globalization;
 using Plisky.Diagnostics;
 using TnLSite.Models;
 
-namespace TnLSite.Data;
+namespace TnLSite.Repository;
 
 public sealed class FileUserRepository : RepositoryBase {
 

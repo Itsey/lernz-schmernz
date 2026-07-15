@@ -1,16 +1,13 @@
-﻿using Plisky.Diagnostics;
-using TnLSite.Models;
-
-namespace TnLSite.Data;
+namespace TnLSite.Repository;
 
 public class RepositoryBase {
-    protected Bilge b;
+    protected ILogger lg;
     public static string DataDirectory { get; private set; } = "data";
     public static bool IsInitialised { get; set; } = false;
 
-    public RepositoryBase(DynamicTrace dt) {
-        b = dt.CreateBilge("tnl-repository");
-        b.Info.Flow($"IsInitalised={IsInitialised}");
+    public RepositoryBase(ILogger lgr) {
+        lg = lgr;
+        lg.LogInformation("RepositoryBase initialized");
     }
 
 
