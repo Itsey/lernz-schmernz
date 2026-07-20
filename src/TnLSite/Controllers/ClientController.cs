@@ -151,7 +151,7 @@ public sealed partial class ClientController : ApiControllerBase {
 
     private string? GetToken() {
         logger.LogInformation("Entered {Method}", nameof(GetToken));
-        var token = Request.Headers[TOKEN_HEADER_NAME].ToString();
+        string token = Request.Headers[TOKEN_HEADER_NAME].ToString();
         return string.IsNullOrWhiteSpace(token) ? null : token;
     }
 }

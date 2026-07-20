@@ -13,7 +13,7 @@ public abstract class ApiControllerBase : ControllerBase {
         string result = "Hello, World!";
         for (int i = 0; i < 10; i++) {
             result += $" {i}";
-            Thread.Sleep(500);
+            Thread.Sleep(50);
         }
         return result;
     }

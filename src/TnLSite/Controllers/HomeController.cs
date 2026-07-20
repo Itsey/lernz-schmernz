@@ -46,7 +46,7 @@ namespace TnLSite.Controllers {
             string key = Request.Query["key"].ToString();
             string urlPayload = string.Empty;
 
-            foreach (var l in Request.Query.Keys) {
+            foreach (string l in Request.Query.Keys) {
                 urlPayload += $"{l}={Request.Query[l]},";
             }
 

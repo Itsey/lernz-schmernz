@@ -1,13 +1,12 @@
 using System.Globalization;
-using Plisky.Diagnostics;
-using TnLSite.Models;
 
 namespace TnLSite.Repository;
 
 public sealed class FileUserRepository : RepositoryBase {
 
-    public FileUserRepository(DynamicTrace dt) : base(dt) {
-        b.Info.Flow();
+    public FileUserRepository(ILogger lgr) : base(lgr) {
+        lg.LogInformation("Enter FileUserRepository");
+
     }
 
     public override UserRecord? GetUser(string userId) {
@@ -15,21 +14,21 @@ public sealed class FileUserRepository : RepositoryBase {
             return null;
         }
 
-        var path = GetUserFilePath(userId);
+        string path = GetUserFilePath(userId);
         if (!File.Exists(path)) {
             return null;
         }
 
-        var lines = File.ReadAllLines(path);
+        string[] lines = File.ReadAllLines(path);
         var values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-        foreach (var line in lines) {
-            var index = line.IndexOf('=');
+        foreach (string line in lines) {
+            int index = line.IndexOf('=');
             if (index <= 0) {
                 continue;
             }
 
-            var key = line[..index].Trim();
-            var value = line[(index + 1)..].Trim();
+            string key = line[..index].Trim();
+            string value = line[(index + 1)..].Trim();
             values[key] = value;
         }
 
@@ -51,8 +50,8 @@ public sealed class FileUserRepository : RepositoryBase {
         }
 
         Directory.CreateDirectory(DataDirectory);
-        var path = GetUserFilePath(user.UserId);
-        var lines = new[] {
+        string path = GetUserFilePath(user.UserId);
+        string[] lines = new[] {
             $"userId={user.UserId}",
             $"userName={user.UserName}",
             $"password={user.Password}",
@@ -69,20 +68,20 @@ public sealed class FileUserRepository : RepositoryBase {
             return false;
         }
 
-        var path = GetUserFilePath(userId);
+        string path = GetUserFilePath(userId);
         return File.Exists(path);
     }
 
     private static string GetValue(IReadOnlyDictionary<string, string> values, string key, string fallback = "") {
-        return values.TryGetValue(key, out var value) ? value : fallback;
+        return values.TryGetValue(key, out string? value) ? value : fallback;
     }
 
     private static decimal ParseDecimal(string value) {
-        return decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out var result) ? result : 0m;
+        return decimal.TryParse(value, NumberStyles.Number, CultureInfo.InvariantCulture, out decimal result) ? result : 0m;
     }
 
     private static bool ParseBool(string value, bool fallback) {
-        return bool.TryParse(value, out var result) ? result : fallback;
+        return bool.TryParse(value, out bool result) ? result : fallback;
     }
 
     private static DateTime ParseDate(string value) {

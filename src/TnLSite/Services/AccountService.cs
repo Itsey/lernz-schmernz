@@ -102,4 +102,12 @@ public sealed class AccountService {
         repository.SaveUser(user);
         return (newBalance, null);
     }
+
+    internal async Task SendGift(string userId, string recipientId, long amount, DateTime transferDate) {
+
+        var usr = repository.GetUser(userId);
+        var tgt = repository.GetUser(recipientId);
+
+
+    }
 }

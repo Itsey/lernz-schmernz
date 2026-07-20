@@ -1,3 +1,4 @@
+using CSharpFunctionalExtensions;
 using Microsoft.AspNetCore.Mvc;
 using Plisky.Diagnostics;
 using TnLSite.Controllers;
@@ -5,7 +6,6 @@ using TnLSite.Models;
 using TnLSite.Services;
 
 namespace TnLSite.BilgeVersion;
-
 
 [ApiController]
 [Route("api/web")]
@@ -24,14 +24,76 @@ public sealed class WebController : ApiControllerBase {
         this.tokenService = tokenService;
     }
 
+    [HttpPost("user")]
+    public ActionResult<UserDetails> CreateUser([FromBody] CreateUserRequest request) {
+        b.Info.Flow();
+
+        var v = ValidateRequestAndGetToken(request, request?.UserId);
+        if (v.IsFailure) {
+            return v.Error;
+        }
 
 
+        var user = accountService.CreateUser(request.UserId, request.UserName, request.Password);
+        return user is null ? BadRequest() : Ok(user);
+    }
 
+    public ActionResult Gamble([FromBody] GambleRequest request) {
+        return Ok();
+    }
+
+    [HttpGet("balance/{userId}")]
+    public ActionResult<decimal> GetBalance(string userId) {
+        b.Info.Flow($"{userId}");
+
+        var v = ValidateRequestAndGetToken(userId, userId);
+        if (v.IsFailure) {
+            return v.Error;
+        }
+
+        decimal? balance = accountService.GetBalance(userId, v.Value);
+        return balance is null ? NotFound() : Ok(balance.Value);
+    }
+
+    [HttpGet("user/{userId}")]
+    public ActionResult<UserDetails> GetUser(string userId) {
+        b.Info.Flow($"{userId}");
+
+        var v = ValidateRequestAndGetToken(userId, userId);
+        if (v.IsFailure) {
+            b.Verbose.Log($"validation failed for {userId}, error.");
+            return v.Error;
+        }
+
+        var details = accountService.GetUserDetails(userId, v.Value);
+
+        if (details == null) {
+            b.Warning.Log($"Request: {userId}. User details not found.");
+            return NotFound();
+        }
+
+        b.Info.Log($"Request: {userId}. User details retrieved successfully.");
+        return Ok(details);
+    }
+
+    public async Task<ActionResult> Gift([FromBody] GiftRequest request) {
+        b.Info.Flow();
+
+        var v = ValidateRequestAndGetToken(request, request?.UserId);
+        if (v.IsFailure) {
+            b.Verbose.Log($"validation failed for {request?.UserId}, error.");
+            return v.Error;
+        }
+
+
+        await accountService.SendGift(request.UserId, request.RecipientId, request.Amount.Value, request.TransferDate.Value);
+
+        return Ok();
+    }
 
     [HttpPost("login")]
     public ActionResult<string> Login([FromBody] LoginRequest request) {
         b.Info.Flow();
-        b.Info.Log("Quick Mesage To Test Logging");
 
         if (request is null) {
             b.Warning.Log("Null request found");
@@ -58,95 +120,17 @@ public sealed class WebController : ApiControllerBase {
         return Ok(true);
     }
 
-    [HttpGet("user/{userId}")]
-    public ActionResult<UserDetails> GetUser(string userId) {
-        b.Info.Flow($"{userId}");
-
-        string? token = GetToken();
-        if (token is null) {
-            b.Warning.Log($"Request: {userId}. No token provided, failed to auth");
-            return Unauthorized();
-        }
-
-        if (!tokenService.ValidateToken(userId, token)) {
-            b.Warning.Log($"Request: {userId}. Token validation failed.");
-            return Unauthorized();
-        }
-
-        var details = accountService.GetUserDetails(userId, token);
-
-        if (details != null) {
-            b.Info.Log($"Request: {userId}. User details retrieved successfully.");
-        } else {
-            b.Warning.Log($"Request: {userId}. User details not found.");
-        }
-        if (details == null) {
-            b.Warning.Log($"Request: {userId}. User details not found.");
-            return NotFound();
-        }
-        return Ok(details);
-    }
-
-    [HttpGet("balance/{userId}")]
-    public ActionResult<decimal> GetBalance(string userId) {
-        b.Info.Flow($"{userId}");
-
-        string? token = GetToken();
-        if (token is null) {
-            b.Warning.Log($"Request: {userId}. No token provided, failed to auth");
-            return Unauthorized();
-        }
-
-        if (!tokenService.ValidateToken(userId, token)) {
-            b.Warning.Log($"Request: {userId}. Token validation failed.");
-            return Unauthorized();
-        }
-
-        decimal? balance = accountService.GetBalance(userId, token);
-        return balance is null ? NotFound() : Ok(balance.Value);
-    }
-
-    [HttpPost("user")]
-    public ActionResult<UserDetails> CreateUser([FromBody] CreateUserRequest request) {
-        b.Info.Flow();
-        if (request is null) {
-            return BadRequest();
-        }
-
-        string? token = GetToken();
-        if (token is null) {
-            b.Warning.Log($"Request: {request.UserId}. No token provided, failed to auth");
-            return Unauthorized();
-        }
-
-        if (!tokenService.ValidateToken(request.UserId, token)) {
-            b.Warning.Log($"Request: {request.UserId}. Token validation failed.");
-            return Unauthorized();
-        }
-
-        var user = accountService.CreateUser(request.UserId, request.UserName, request.Password);
-        return user is null ? BadRequest() : Ok(user);
-    }
-
     [HttpPost("balance")]
     public ActionResult<decimal> UpdateBalance([FromBody] UpdateBalanceRequest request) {
         b.Info.Flow();
-        if (request is null) {
-            return BadRequest();
+
+        var v = ValidateRequestAndGetToken(request, request?.UserId);
+        if (v.IsFailure) {
+            b.Verbose.Log($"validation failed for {request?.UserId}, error.");
+            return v.Error;
         }
 
-        string? token = GetToken();
-        if (token is null) {
-            b.Warning.Log($"Request: {request.UserId}. No token provided, failed to auth");
-            return Unauthorized();
-        }
-
-        if (!tokenService.ValidateToken(request.UserId, token)) {
-            b.Warning.Log($"Request: {request.UserId}. Token validation failed.");
-            return Unauthorized();
-        }
-
-        var result = accountService.UpdateBalance(request.UserId, token, request.Amount, request.Date);
+        var result = accountService.UpdateBalance(request.UserId, v.Value, request.Amount, request.Date);
         if (result.balance is null) {
             return BadRequest(result.error);
         }
@@ -160,12 +144,28 @@ public sealed class WebController : ApiControllerBase {
         return string.IsNullOrWhiteSpace(token) ? null : token;
     }
 
-    public ActionResult Gamble([FromBody] GambleRequest request) {
-        return Ok();
+    private Result<string, ActionResult> ValidateRequestAndGetToken(object? request, string? userId) {
+        b.Info.Flow();
+
+        if (request is null || string.IsNullOrWhiteSpace(userId)) {
+            b.Warning.Log("Request is null or userId is invalid.", userId);
+            return Result.Failure<string, ActionResult>(BadRequest());
+        }
+
+        string? token = GetToken();
+        if (token is null) {
+            b.Warning.Log($"Request: {userId}. No token provided, failed to auth");
+            return Result.Failure<string, ActionResult>(Unauthorized());
+        }
+
+        if (!tokenService.ValidateToken(userId, token)) {
+            b.Warning.Log($"Request: {userId}. Token validation failed.");
+            return Result.Failure<string, ActionResult>(Unauthorized());
+        }
+
+        return Result.Success<string, ActionResult>(token);
     }
 
 
-    public ActionResult Gift([FromBody] GiftRequest request) {
-        return Ok();
-    }
+
 }

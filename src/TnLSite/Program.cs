@@ -20,6 +20,8 @@ namespace TnLSite {
             Bilge b = new Bilge();
             Bilge.Alert.Online("TnL");
 
+            var bil = b.ToILogger();
+
             // Add services to the container.
             builder.Services.AddControllers();
             builder.Services.AddRazorPages();
@@ -27,7 +29,7 @@ namespace TnLSite {
             builder.Services.AddSingleton<TnLSite.Services.AccountService>();
             builder.Services.AddSingleton<TnLSite.Services.ITokenService, TnLSite.Services.InMemoryTokenService>();
             builder.Services.AddSingleton<DynamicTrace>();
-
+            builder.Services.AddSingleton<ILogger>(bil);
 
 
             var app = builder.Build();
