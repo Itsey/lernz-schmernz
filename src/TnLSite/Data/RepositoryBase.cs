@@ -25,7 +25,7 @@ public class RepositoryBase {
         return null;
     }
 
-    public virtual void SaveUser(UserRecord user) {
+    public virtual async Task SaveUser(UserRecord user) {
     }
 
     public virtual bool UserExists(string userId) {

@@ -11,7 +11,7 @@ public static class UserMapperExtensions {
         return new UserRecord {
             UserId = details.UserId,
             UserName = details.UserName,
-            Balance = details.Balance,
+            Balance = (long)details.Balance,
             Enabled = details.Enabled,
             LastLogin = details.LastLogin,
             Password = string.Empty

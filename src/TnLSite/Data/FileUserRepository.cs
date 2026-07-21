@@ -36,7 +36,7 @@ public sealed class FileUserRepository : RepositoryBase {
             UserId = GetValue(values, "userId", userId),
             UserName = GetValue(values, "userName"),
             Password = GetValue(values, "password"),
-            Balance = ParseDecimal(GetValue(values, "balance")),
+            Balance = (long)ParseDecimal(GetValue(values, "balance")),
             Enabled = ParseBool(GetValue(values, "enabled"), true),
             LastLogin = ParseDate(GetValue(values, "lastLogin"))
         };
@@ -44,7 +44,7 @@ public sealed class FileUserRepository : RepositoryBase {
         return record;
     }
 
-    public override void SaveUser(UserRecord user) {
+    public override async Task SaveUser(UserRecord user) {
         if (user is null || string.IsNullOrWhiteSpace(user.UserId)) {
             return;
         }
@@ -60,7 +60,7 @@ public sealed class FileUserRepository : RepositoryBase {
             $"lastLogin={user.LastLogin.ToString("O", CultureInfo.InvariantCulture)}"
         };
 
-        File.WriteAllLines(path, lines);
+        await File.WriteAllLinesAsync(path, lines);
     }
 
     public override bool UserExists(string userId) {

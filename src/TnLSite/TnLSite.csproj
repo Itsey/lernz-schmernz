@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -10,6 +10,12 @@
     <PackageReference Include="CSharpFunctionalExtensions" Version="3.7.0" />
     <PackageReference Include="Plisky.Diagnostics" Version="3.2.5" />
     <PackageReference Include="Plisky.Listeners" Version="3.2.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>TestNLearn.Test</_Parameter1>
+    </AssemblyAttribute>
   </ItemGroup>
 
 </Project>

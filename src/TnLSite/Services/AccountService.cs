@@ -68,7 +68,7 @@ public sealed class AccountService {
             UserId = userId,
             UserName = userName,
             Password = password,
-            Balance = 0m,
+            Balance = 0,
             Enabled = true,
             LastLogin = DateTime.UtcNow
         };
@@ -93,21 +93,27 @@ public sealed class AccountService {
             return (null, "User is disabled.");
         }
 
-        var newBalance = user.Balance + amount;
-        if (amount < 0m && newBalance < 0m) {
-            return (null, "Insufficient funds.");
-        }
-
-        user.Balance = newBalance;
+        user.SetBalanceChangeAtDate(date, (long)amount);
         repository.SaveUser(user);
-        return (newBalance, null);
+        return (user.Balance, null);
     }
 
     internal async Task SendGift(string userId, string recipientId, long amount, DateTime transferDate) {
-
+        b.Info.Flow($"{userId}>{recipientId} amount {amount} @ {transferDate}");
         var usr = repository.GetUser(userId);
         var tgt = repository.GetUser(recipientId);
 
+        if (!usr.HasSufficientFunds(amount)) {
+            b.Error.Log("User does not have sufficient funds to make transfer. Error.");
+            throw new InvalidOperationException("Insufficient funds.");
+        }
+
+        usr.SetBalanceChangeAtDate(transferDate, -amount);
+        tgt.SetBalanceChangeAtDate(transferDate, amount);
+
+        await repository.SaveUser(usr);
+        await repository.SaveUser(tgt);
+        b.Verbose.Log("Transfer captured");
 
     }
 }
