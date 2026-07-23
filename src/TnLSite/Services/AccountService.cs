@@ -16,20 +16,15 @@ public sealed class AccountService {
         b.Info.Flow();
     }
 
-    public string? Login(string userId, string password) {
+    public async Task<string?> Login(string userId, string password) {
         b.Info.Flow($"uid {userId} pwd {password}");  // Note do not log passwords in real.
 
         if (string.IsNullOrWhiteSpace(userId) || string.IsNullOrWhiteSpace(password)) {
             return null;
         }
 
-        var user = repository.GetUser(userId);
-        if (user is null || !user.Enabled || !string.Equals(user.Password, password, StringComparison.Ordinal)) {
-            return null;
-        }
+        var user = await repository.UserLogin(userId, password);
 
-        user.LastLogin = DateTime.UtcNow;
-        repository.SaveUser(user);
         return tokenService.CreateToken(userId);
     }
 

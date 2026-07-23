@@ -22,14 +22,14 @@ public sealed partial class ClientController : ApiControllerBase {
     }
 
     [HttpPost("login")]
-    public ActionResult<string> Login([FromBody] LoginRequest request) {
+    public async Task<ActionResult<string>> Login([FromBody] LoginRequest request) {
         LogFlowMessage(logger, nameof(Login));
         if (request is null) {
             logger.LogWarning("Login request was null.");
             return BadRequest();
         }
 
-        string? token = accountService.Login(request.UserId, request.Password);
+        string? token = await accountService.Login(request.UserId, request.Password);
         if (token is null) {
             logger.LogWarning("Login failed for user {UserId}.", request.UserId);
         }

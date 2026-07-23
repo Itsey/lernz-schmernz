@@ -41,13 +41,13 @@ public sealed class UserRecord {
         long runningBalance = 0;
         long currentBalance = 0;
         long reserved = 0;
-        DateTime now = DateTime.UtcNow;
+        var now = DateTime.UtcNow;
 
         foreach (var tx in Transactions) {
             runningBalance += tx.Amount;
             tx.Balance = runningBalance;
 
-            DateTime txTimeUtc = tx.When.Kind == DateTimeKind.Utc ? tx.When : tx.When.ToUniversalTime();
+            var txTimeUtc = tx.When.Kind == DateTimeKind.Utc ? tx.When : tx.When.ToUniversalTime();
 
             if (txTimeUtc <= now) {
                 currentBalance = runningBalance;

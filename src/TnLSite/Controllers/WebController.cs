@@ -1,4 +1,4 @@
-using CSharpFunctionalExtensions;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Mvc;
 using Plisky.Diagnostics;
 using TnLSite.Controllers;
@@ -86,13 +86,13 @@ public sealed class WebController : ApiControllerBase {
         }
 
 
-        await accountService.SendGift(request.UserId, request.RecipientId, request.Amount.Value, request.TransferDate.Value);
+        await accountService.SendGift(request!.UserId, request!.RecipientId, request!.Amount.Value, request!.TransferDate.Value);
 
         return Ok();
     }
 
     [HttpPost("login")]
-    public ActionResult<string> Login([FromBody] LoginRequest request) {
+    public async Task<ActionResult<string>> Login([FromBody] LoginRequest request) {
         b.Info.Flow();
 
         if (request is null) {
@@ -106,7 +106,7 @@ public sealed class WebController : ApiControllerBase {
         }
 
         b.Info.Log($"attempting to authenticate {request.UserId}");
-        string? token = accountService.Login(request.UserId, request.Password);
+        string? token = await accountService.Login(request.UserId, request.Password);
         return token is null ? Unauthorized() : Ok(token);
     }
 
@@ -144,26 +144,26 @@ public sealed class WebController : ApiControllerBase {
         return string.IsNullOrWhiteSpace(token) ? null : token;
     }
 
-    private Result<string, ActionResult> ValidateRequestAndGetToken(object? request, string? userId) {
+    private ValidatedResult<string, ActionResult> ValidateRequestAndGetToken([NotNullWhen(true)] object? request, [NotNullWhen(true)] string? userId) {
         b.Info.Flow();
 
         if (request is null || string.IsNullOrWhiteSpace(userId)) {
             b.Warning.Log("Request is null or userId is invalid.", userId);
-            return Result.Failure<string, ActionResult>(BadRequest());
+            return ValidatedResult<string, ActionResult>.Fail(BadRequest());
         }
 
         string? token = GetToken();
         if (token is null) {
             b.Warning.Log($"Request: {userId}. No token provided, failed to auth");
-            return Result.Failure<string, ActionResult>(Unauthorized());
+            return ValidatedResult<string, ActionResult>.Fail(Unauthorized());
         }
 
         if (!tokenService.ValidateToken(userId, token)) {
             b.Warning.Log($"Request: {userId}. Token validation failed.");
-            return Result.Failure<string, ActionResult>(Unauthorized());
+            return ValidatedResult<string, ActionResult>.Fail(Unauthorized());
         }
 
-        return Result.Success<string, ActionResult>(token);
+        return ValidatedResult<string, ActionResult>.Ok(token);
     }
 
 

@@ -17,12 +17,12 @@ public sealed class MobileController : ApiControllerBase {
     }
 
     [HttpPost("login")]
-    public ActionResult<string> Login([FromBody] LoginRequest request) {
+    public async Task<ActionResult<string>> Login([FromBody] LoginRequest request) {
         if (request is null) {
             return BadRequest();
         }
 
-        string? token = accountService.Login(request.UserId, request.Password);
+        string? token = await accountService.Login(request.UserId, request.Password);
         return token is null ? Unauthorized() : Ok(token);
     }
 

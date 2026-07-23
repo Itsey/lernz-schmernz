@@ -1,6 +1,5 @@
 using Shouldly;
 using TnLSite.Repository;
-using Xunit;
 
 namespace TestNLearn.Test;
 
@@ -8,7 +7,7 @@ public class UserRecordTests {
     [Fact]
     public void RecalculateBalanceAndReserve_EmptyTransactions_SetsZeroBalanceAndReserve() {
         var user = new UserRecord();
-        
+
         user.SetBalanceChangeAtDate(DateTime.UtcNow, 0);
 
         user.Balance.ShouldBe(0);
@@ -65,10 +64,10 @@ public class UserRecordTests {
         user.SetBalanceChangeAtDate(now.AddHours(-2), 200);
         user.SetBalanceChangeAtDate(now.AddDays(1), -50);
         user.SetBalanceChangeAtDate(now.AddDays(2), -30);
-        user.SetBalanceChangeAtDate(now.AddDays(3), 100); // Future positive ignored for reserve
+        user.SetBalanceChangeAtDate(now.AddDays(3), 100);
 
         user.Balance.ShouldBe(200);
-        user.ReservedBalance.ShouldBe(80); // 50 + 30 needed to cover future negative transactions
+        user.ReservedBalance.ShouldBe(80);
 
         user.Transactions[0].Balance.ShouldBe(200);
         user.Transactions[1].Balance.ShouldBe(150);
@@ -82,7 +81,7 @@ public class UserRecordTests {
         var now = DateTime.UtcNow;
 
         user.SetBalanceChangeAtDate(now.AddHours(-2), 200);
-        user.SetBalanceChangeAtDate(now.AddDays(1), -80); // Reserved = 80, Available = 120
+        user.SetBalanceChangeAtDate(now.AddDays(1), -80);
 
         user.HasSufficientFunds(100).ShouldBeTrue();
         user.HasSufficientFunds(120).ShouldBeTrue();

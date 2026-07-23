@@ -31,4 +31,19 @@ public class RepositoryBase {
     public virtual bool UserExists(string userId) {
         return false;
     }
+
+    internal async Task<UserRecord?> UserLogin(string userId, string password) {
+
+        if (userId == "valid") {
+            return new UserRecord() {
+                UserId = userId,
+                Password = password,
+                Enabled = true,
+                LastLogin = DateTime.UtcNow
+            };
+        }
+
+        lg.LogInformation($"User id not found, returning null");
+        return null;
+    }
 }

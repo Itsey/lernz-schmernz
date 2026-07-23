@@ -58,4 +58,17 @@ public class LoggingTests {
         f.ResponseMessage.StatusCode.ShouldBe(HttpStatusCode.OK);
     }
 
+
+    [Fact]
+    public async Task Usecase_1_user_logs_in_gets_balance() {
+        b.Info.Flow();
+
+        var f = await "http://localhost:5050/api/web/login/".AllowAnyHttpStatus().PostJsonAsync(new {
+            UserId = "valid",
+            Password = "valid"
+        });
+
+        f.ResponseMessage.StatusCode.ShouldBe(HttpStatusCode.OK);
+    }
+
 }
