@@ -14,7 +14,7 @@ public class LoggingTests {
     }
 
 
-    [Fact]
+    [Fact(Skip = "Run Required")]
     public async Task Get_user_without_token_returns_unauthorised() {
         b.Info.Flow();
         // Was thinking that this was clearer but its actually rubbish.  

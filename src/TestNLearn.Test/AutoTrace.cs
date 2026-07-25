@@ -26,6 +26,7 @@ public class XunitAutoTraceFixture : XunitTestFramework {
     }
 
     public new void Dispose() {
+        Bilge.Default.Flush();
         base.Dispose();
     }
 }

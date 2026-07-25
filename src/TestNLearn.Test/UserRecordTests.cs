@@ -1,3 +1,4 @@
+using Plisky.Plumbing;
 using Shouldly;
 using TnLSite.Repository;
 
@@ -36,7 +37,7 @@ public class UserRecordTests {
     public void RecalculateBalanceAndReserve_UnorderedTransactions_SortsByDateAndCalculatesCorrectly() {
         var user = new UserRecord();
         var now = DateTime.UtcNow;
-
+        var xx = InternalUtil.GetCallingStackFrame();
         // Added out of order
         user.SetBalanceChangeAtDate(now.AddHours(-1), 50);
         user.SetBalanceChangeAtDate(now.AddHours(-3), 100);
