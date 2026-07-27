@@ -1,4 +1,5 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Plisky.Diagnostics;
 using Plisky.Plumbing;
@@ -7,9 +8,48 @@ using Plisky.Plumbing;
 namespace TestNLearn.Test;
 
 public class Experimental {
-    public Bilge b = new Bilge("experimental-tests");
+    public Bilge b;
+
+    public Experimental() {
+        b = new Bilge("experimental-tests");
+    }
+
+    public string MethodName([CallerMemberName] string callerName = "", [CallerLineNumber] int callerLineNumber = 0) {
+        return $"{callerName}";
+    }
+
+    public string MethodName2() {
+        return InternalUtil.GetCallingStackFrame("Guard_clause_implementation_test2").Item2;
+    }
+
+    [Fact]
+    public void Guard_clause_implementation_test2() {
+        b.Info.Flow();
+
+        Stopwatch sw = Stopwatch.StartNew();
+
+        int loopCount = 100000;
+
+        for (int i = 0; i < loopCount; i++) {
+            Assert.Equal(nameof(Guard_clause_implementation_test2), MethodName());
+        }
+
+        sw.Stop();
+
+        Stopwatch sw2 = Stopwatch.StartNew();
 
 
+
+        for (int i = 0; i < loopCount; i++) {
+            Assert.Equal(nameof(Guard_clause_implementation_test2), MethodName2());
+        }
+
+        sw2.Stop();
+
+        b.Info.Log($"{sw.ElapsedMilliseconds} ms {sw2.ElapsedMilliseconds} ms");
+
+
+    }
 
     [Fact]
     public void Guard_clause_implementation_test1() {
