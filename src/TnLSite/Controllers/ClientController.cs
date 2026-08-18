@@ -14,11 +14,13 @@ public sealed partial class ClientController : ApiControllerBase {
     private readonly AccountService accountService;
     private readonly ILogger<ClientController> logger;
     private readonly ITokenService tokenService;
+    private readonly IPersistenceService persistenceService;
 
-    public ClientController(AccountService accountService, ITokenService tokenService, ILogger<ClientController> logger) {
+    public ClientController(AccountService accountService, ITokenService tokenService, ILogger<ClientController> logger, IPersistenceService persistenceService) {
         this.accountService = accountService;
         this.tokenService = tokenService;
         this.logger = logger;
+        this.persistenceService = persistenceService;
     }
 
     [HttpPost("login")]
@@ -148,6 +150,18 @@ public sealed partial class ClientController : ApiControllerBase {
 
         return Ok(result.balance.Value);
     }
+
+    [HttpPost("/deposit")]
+    public IActionResult Deposit(string userId, long amount) {
+        logger.LogInformation("[CLI] Deposit: User={UserId}, Amount={Amount}", userId, amount);
+
+        var user = persistenceService.Deposit(userId, amount);
+
+        logger.LogInformation("[CLI] Deposit complete: NewBalance={Balance}", user.Balance);
+
+        return Ok(user);
+    }
+
 
     private string? GetToken() {
         logger.LogInformation("Entered {Method}", nameof(GetToken));

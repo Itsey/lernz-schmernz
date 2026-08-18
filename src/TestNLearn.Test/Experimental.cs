@@ -64,7 +64,7 @@ public class Experimental {
         //Guard(on);
         Guard(0, on);
         Guard(o, o1, o2);  // This works
-        Guard(o, 01, "fred");  // This does not
+        //Guard(o, 01, "fred");  // This does not
 
     }
 

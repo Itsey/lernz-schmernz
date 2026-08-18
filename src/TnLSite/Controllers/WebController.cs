@@ -14,8 +14,9 @@ public sealed class WebController : ApiControllerBase {
     protected Bilge b;
     private readonly AccountService accountService;
     private readonly ITokenService tokenService;
+    private readonly IPersistenceService persistenceService;
 
-    public WebController(AccountService accountService, ITokenService tokenService, DynamicTrace dt) {
+    public WebController(AccountService accountService, ITokenService tokenService, IPersistenceService persistenceService, DynamicTrace dt) {
         b = dt.CreateBilge("tnl-web-controller");
         b.AddContext("controller", nameof(WebController));
         b.AddContext("flowstart", DateTime.Now.ToString("HH:mm:ss:fff"));
@@ -23,6 +24,7 @@ public sealed class WebController : ApiControllerBase {
         b.Info.Flow("WebController");
         this.accountService = accountService;
         this.tokenService = tokenService;
+        this.persistenceService = persistenceService;
     }
 
     [HttpPost("user")]
@@ -144,6 +146,17 @@ public sealed class WebController : ApiControllerBase {
         }
 
         return Ok(result.balance.Value);
+    }
+    [HttpPost("/deposit")]
+    public IActionResult Deposit(string userId, long amount) {
+        b.Info.Flow();
+        b.Info.Log($"[WEB] Deposit: User={userId}, Amount={amount}");
+
+        var user = persistenceService.Deposit(userId, amount);
+
+        b.Info.Log($"[WEB] Deposit complete: NewBalance={user.Balance}");
+
+        return Ok(user);
     }
 
     private string? GetToken() {

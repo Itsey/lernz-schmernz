@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using TnLSite.Models;
 using TnLSite.Services;
+using Serilog;
 
 
 namespace TnLSite.Controllers;
@@ -10,14 +11,19 @@ namespace TnLSite.Controllers;
 public sealed class MobileController : ApiControllerBase {
     private readonly AccountService accountService;
     private readonly ITokenService tokenService;
+    private readonly IPersistenceService persistenceService;
+    
 
-    public MobileController(AccountService accountService, ITokenService tokenService) {
+    public MobileController(AccountService accountService, ITokenService tokenService, IPersistenceService persistenceService, Serilog.ILogger logger) {
         this.accountService = accountService;
         this.tokenService = tokenService;
+        this.persistenceService = persistenceService;
+        Log.Logger = logger;
     }
 
     [HttpPost("login")]
     public async Task<ActionResult<string>> Login([FromBody] LoginRequest request) {
+        Log.Information("[MOB] In Login method");
         if (request is null) {
             return BadRequest();
         }
@@ -28,6 +34,7 @@ public sealed class MobileController : ApiControllerBase {
 
     [HttpGet("user/{userId}")]
     public ActionResult<UserDetails> GetUser(string userId) {
+        Log.Information($"[MOB] In GetUser method");
         string? token = GetToken();
         if (token is null) {
             return Unauthorized();
@@ -96,6 +103,16 @@ public sealed class MobileController : ApiControllerBase {
         }
 
         return Ok(result.balance.Value);
+    }
+    [HttpPost("/deposit")]
+    public IActionResult Deposit(string userId, long amount) {
+        Log.Information("[MOB] Deposit: User={UserId}, Amount={Amount}", userId, amount);
+
+        var user = persistenceService.Deposit(userId, amount);
+
+        Log.Information("[MOB] Deposit complete: NewBalance={Balance}", user.Balance);
+
+        return Ok(user);
     }
 
     private string? GetToken() {
